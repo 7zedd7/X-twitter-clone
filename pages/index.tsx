@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useCallback } from "react";
 import Image from "next/image";
 import { FaXTwitter } from "react-icons/fa6";
 import { BiHomeCircle } from "react-icons/bi";
@@ -11,10 +10,13 @@ import { FiBookmark } from "react-icons/fi"
 import { BsPeople } from "react-icons/bs"
 import { BsPerson } from "react-icons/bs"
 import { CiCircleMore } from "react-icons/ci"
-
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google'
 
 import { list } from "postcss";
 import FeedCard from "@/components/FeedCard";
+import toast from "react-hot-toast";
+import { graphqlclient } from "@/clients/api";
+import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
 
 
 
@@ -29,44 +31,59 @@ const sidebarMenuItems: Array<XSidebarbutton> = [
     icon: <BiHomeCircle />,
   },
   {
-    title : "Explore",
-    icon : <RiSearchLine />,
+    title: "Explore",
+    icon: <RiSearchLine />,
   },
   {
-    title : "Notifications",
-    icon : <IoNotificationsOutline />,
+    title: "Notifications",
+    icon: <IoNotificationsOutline />,
   },
   {
-    title : "Messages",
-    icon : <HiOutlineMail />,
+    title: "Messages",
+    icon: <HiOutlineMail />,
   },
   {
-    title : "Lists",
-    icon : <RiFileListLine />,
+    title: "Lists",
+    icon: <RiFileListLine />,
   },
   {
-    title : "Bookmarks",
-    icon : <FiBookmark />,
+    title: "Bookmarks",
+    icon: <FiBookmark />,
   },
   {
-    title : "Communities",
-    icon : <BsPeople />,
+    title: "Communities",
+    icon: <BsPeople />,
   },
   {
-    title : "Verified",
-    icon : <FaXTwitter />,
+    title: "Verified",
+    icon: <FaXTwitter />,
   },
   {
-    title : "Profile",
-    icon : <BsPerson />,
+    title: "Profile",
+    icon: <BsPerson />,
   },
   {
-    title : "More ",
-    icon : <CiCircleMore />,
+    title: "More ",
+    icon: <CiCircleMore />,
   }
 ];
 
 export default function Home() {
+
+  const handleLoginWithGooogle = useCallback(async (cred: CredentialResponse) => {
+    const googleToken = cred.credential
+    if (!googleToken) return toast.error('Google Token not found ');
+
+    const { verifyGoogleToken} = await graphqlclient.request(verifyUserGoogleTokenQuery, {token: googleToken})
+
+
+      toast.success('Verified Success');
+      console.log(verifyGoogleToken);
+
+      if(verifyGoogleToken) window.localStorage.setItem('X_twitter', verifyGoogleToken)
+  }, [])
+
+
   return (
     <div >
       <div className="grid grid-cols-12 h-screen w-screen px-60">
@@ -84,25 +101,30 @@ export default function Home() {
               ))}
             </ul>
             <div className="pl-2">
-            <button className="bg-[#1d9bf0] text-lg p-3 mt-6 font-bold rounded-full w-60  hover:bg-[#1A8CD8] transition-all" >Post</button>
+              <button className="bg-[#1d9bf0] text-lg p-3 mt-6 font-bold rounded-full w-60  hover:bg-[#1A8CD8] transition-all" >Post</button>
             </div>
           </div>
         </div>
         <div className="col-span-5 border-r-[0.2px] border-l-[0.2px] border-[#2F3336]">
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
-        <FeedCard/>
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
         </div>
-        <div className="col-span-3"></div>
+        <div className="col-span-3 p-5">
+          <div className="p-5 bg-slate-900 rounded-lg">
+            <h1 className="my-2 text-xl">New To X?</h1>
+            <GoogleLogin onSuccess={handleLoginWithGooogle} />
+          </div>
+        </div>
       </div>
     </div>
   );
