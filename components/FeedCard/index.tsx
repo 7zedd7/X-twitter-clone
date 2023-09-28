@@ -6,6 +6,7 @@ import { BsHeart } from "react-icons/bs"
 import { BiBarChart } from "react-icons/bi"
 import { PiUploadSimpleLight } from "react-icons/pi" 
 import { Tweet } from "@/gql/graphql";
+import Link from "next/link";
 
 interface FeedCardProps {
     data: Tweet
@@ -26,7 +27,9 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
                     />}
                 </div>
                 <div className="col-span-11">
-                    <h5>{data.author?.firstName} {data.author?.lastName}</h5>
+                    <h5>
+                        <Link href={`/${data.author?.id}`}>{data.author?.firstName} {data.author?.lastName}</Link>
+                    </h5>
                     <p>
                         {data.content}
                     </p>
